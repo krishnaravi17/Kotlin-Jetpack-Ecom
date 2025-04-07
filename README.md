@@ -46,5 +46,5 @@ A modern eCommerce app built with **Kotlin**, **Jetpack Compose**, **MVVM**, **H
 ### Clone the Repository
 
 ```bash
-git clone https://github.com/your-username/ecommerce-compose-app.git
+git clone https://github.com/krishnaravi17/Kotlin-Jetpack-Ecom
 cd ecommerce-compose-app

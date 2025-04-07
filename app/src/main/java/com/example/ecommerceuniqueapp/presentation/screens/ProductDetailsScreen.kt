@@ -57,7 +57,7 @@ import com.google.accompanist.pager.ExperimentalPagerApi
 fun ProductDetailScreen(navController: NavController) {
     //var products = remember { mutableStateOf<List<Product>>(emptyList()) }
     //sample list
-    val notesList = listOf(
+    /*val notesList = listOf(
         "Drink water",
         "Read Books",
         "Eat fruits",
@@ -66,7 +66,7 @@ fun ProductDetailScreen(navController: NavController) {
         "Read Books1",
         "Eat fruits1",
         "Go for a Walk1",
-    )
+    )*/
 
     Scaffold {
         Surface(
@@ -182,7 +182,8 @@ fun ProductDetailScreen(navController: NavController) {
                 Spacer(modifier = Modifier.height(5.dp))
                 FilterLayout()
 
-                AppComponents().ProductGridLayout(notesList, navController)
+
+                //AppComponents().ProductGridLayout(notesList, navController)
             }
         }
     }

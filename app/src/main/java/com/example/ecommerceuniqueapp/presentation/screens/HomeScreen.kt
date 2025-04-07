@@ -1,5 +1,7 @@
 package com.example.ecommerceuniqueapp.presentation.screens
 
+import android.util.Log
+import android.widget.Toast
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -27,28 +29,38 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.example.ecommerceuniqueapp.R
+import com.example.ecommerceuniqueapp.data.api.NetworkResponse
 import com.example.ecommerceuniqueapp.data.model.NavItem
+import com.example.ecommerceuniqueapp.data.model.ProductModelRes
+import com.example.ecommerceuniqueapp.domain.navigation.Routes
+import com.example.ecommerceuniqueapp.domain.viewmodel.LoginViewModel
+import com.example.ecommerceuniqueapp.domain.viewmodel.ProductViewModel
 import com.example.ecommerceuniqueapp.presentation.components.AppComponents
+import com.example.ecommerceuniqueapp.presentation.components.CustomLoader
 import com.example.ecommerceuniqueapp.presentation.theme.LightGray2
 import com.example.ecommerceuniqueapp.presentation.theme.LightPink1
 import com.example.ecommerceuniqueapp.presentation.theme.MontserratFontFamily
 
 @Composable
-fun HomeScreen(navController: NavController) {
+fun HomeScreen(navController: NavController, viewModel: ProductViewModel = hiltViewModel()) {
     var selectedIndex by remember {
         mutableIntStateOf(0)
     }
@@ -60,71 +72,86 @@ fun HomeScreen(navController: NavController) {
         NavItem("Setting", Icons.Default.Settings, 1)
     )
 
-    Scaffold(topBar = {},
-        bottomBar = {
-            NavigationBar {
-                navItemList.forEachIndexed { index, navItem ->
-                    NavigationBarItem(
-                        selected = selectedIndex == index,
-                        onClick = {
-                            selectedIndex = index
-                        },
-                        icon = {
-                            BadgedBox(badge = {
-                                if (navItem.badgeCount > 0)
-                                    Badge() {
-                                        Text(text = navItem.badgeCount.toString())
-                                    }
-                            }) {
-                                Icon(imageVector = navItem.icon, contentDescription = "Icon")
-                            }
+    val productResults = viewModel.productResult.observeAsState()
 
-                        },
-                        label = {
-                            Text(text = navItem.label)
+    when (val result = productResults.value) {
+        NetworkResponse.Loading ->{
+            CustomLoader()
+            Log.i("NAVIGATION LOADING" ,">>>>>>")
+        }
+        is NetworkResponse.Success -> {
+            LaunchedEffect(Unit) {
+                Log.i("NAVIGATION SUCCESS", ">>>>>>")
+                Log.i("NAVIGATION SUCCESS" ,result.data.size.toString())
+                //navController.navigate(Routes.HomeScreen.route)
+
+            }
+            Scaffold(topBar = {},
+                bottomBar = {
+                    NavigationBar {
+                        navItemList.forEachIndexed { index, navItem ->
+                            NavigationBarItem(
+                                selected = selectedIndex == index,
+                                onClick = {
+                                    selectedIndex = index
+                                },
+                                icon = {
+                                    BadgedBox(badge = {
+                                        if (navItem.badgeCount > 0)
+                                            Badge() {
+                                                Text(text = navItem.badgeCount.toString())
+                                            }
+                                    }) {
+                                        Icon(imageVector = navItem.icon, contentDescription = "Icon")
+                                    }
+
+                                },
+                                label = {
+                                    Text(text = navItem.label)
+                                }
+                            )
                         }
-                    )
+                    }
+                }) {
+                Surface(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(it)
+                ) {
+
+                    Column(
+                        modifier = Modifier
+                            .padding(vertical = 20.dp, horizontal = 20.dp)
+                            .fillMaxSize()
+                            .background(
+                                color = LightGray2
+                            )
+                        //.verticalScroll(rememberScrollState()),
+                    ) {
+                        HomeScreenHeader("Home")
+                        ContentScreen(result.data, selectedIndex, navController)
+
+                    }
+
                 }
             }
-        }) {
-        Surface(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(it)
-        ) {
-
-            Column(
-                modifier = Modifier
-                    .padding(vertical = 20.dp, horizontal = 20.dp)
-                    .fillMaxSize()
-                    .background(
-                        color = LightGray2
-                    )
-                //.verticalScroll(rememberScrollState()),
-            ) {
-                HomeScreenHeader("Home")
-                ContentScreen(selectedIndex, navController)
-
-            }
-
         }
+        is NetworkResponse.Failure -> {
+            Log.i("NAVIGATION ERROR" ,">>>>>>")
+            Toast.makeText(LocalContext.current, result.msg, Toast.LENGTH_SHORT).show()
+        }
+
+        null -> {}
     }
+
+
 
 }
 
 @Composable
-fun HomeScreenInnerLayout(navController: NavController) {
+fun HomeScreenInnerLayout(productList:List<ProductModelRes>, navController: NavController) {
     AppComponents().ProductGridLayout(
-        listOf(
-            "Drink water",
-            "Read Books",
-            "Eat fruits",
-            "Go for a Walk",
-            "Drink water1",
-            "Read Books1",
-            "Eat fruits1",
-            "Go for a Walk1",
-        ), navController
+        productList, navController
     )
 }
 
@@ -188,12 +215,12 @@ fun HomeScreenHeader(text: String) {
 }
 
 @Composable
-fun ContentScreen(selectedIndex: Int, navController: NavController) {
+fun ContentScreen(productList:List<ProductModelRes>, selectedIndex: Int, navController: NavController) {
     when (selectedIndex) {
-        0 -> HomeScreenInnerLayout(navController)
-        1 -> HomeScreenInnerLayout(navController)
-        2 -> HomeScreenInnerLayout(navController)
-        3 -> HomeScreenInnerLayout(navController)
+        0 -> HomeScreenInnerLayout(productList, navController)
+        1 -> HomeScreenInnerLayout(productList, navController)
+        2 -> HomeScreenInnerLayout(productList, navController)
+        3 -> HomeScreenInnerLayout(productList, navController)
 
     }
 }

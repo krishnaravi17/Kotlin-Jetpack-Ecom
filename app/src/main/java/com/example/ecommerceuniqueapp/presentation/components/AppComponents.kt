@@ -53,10 +53,13 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
+import coil.compose.AsyncImage
 import com.example.ecommerceuniqueapp.R
+import com.example.ecommerceuniqueapp.data.model.ProductModelRes
 import com.example.ecommerceuniqueapp.domain.navigation.Routes
 import com.example.ecommerceuniqueapp.presentation.theme.LightGray3
 import com.example.ecommerceuniqueapp.presentation.theme.MontserratFontFamily
+import kotlin.math.roundToInt
 
 class AppComponents {
 
@@ -221,7 +224,7 @@ class AppComponents {
     }
 
     @Composable
-    fun ProductItem(product: String, onClick: () -> Unit) {
+    fun ProductItem(product: ProductModelRes, onClick: () -> Unit) {
         var rating by remember { mutableFloatStateOf(3f) }
 
         Card(
@@ -234,24 +237,24 @@ class AppComponents {
             colors = CardDefaults.cardColors(containerColor = Color.LightGray.copy(alpha = 0.2f))
         ) {
             Column(modifier = Modifier.fillMaxSize()) {
-                /*AsyncImage(
+                AsyncImage(
                     model = product.image,
                     contentDescription = null,
-                    modifier = Modifier
+                      modifier = Modifier
                         .fillMaxWidth()
-                        .height(96.dp)
-                )*/
-                Image(
+                        .height(136.dp)
+                )
+                /*Image(
                     painter = painterResource(id = R.drawable.app_logo),
                     contentDescription = null,
                     modifier = Modifier
                         .fillMaxWidth()
                         .height(136.dp)
-                )
+                )*/
 
                 Spacer(modifier = Modifier.size(8.dp))
                 Text(
-                    text = "Product name",
+                    text = product.title,//"Product name",
                     style = TextStyle(
                         fontSize = 16.sp, fontFamily = MontserratFontFamily
                     ),
@@ -263,7 +266,8 @@ class AppComponents {
 
                 Spacer(modifier = Modifier.size(8.dp))
                 Text(
-                    text = "Autumn And Winter Casual cotton-padded jacket & Cool Stuff, Buy now Limited offer",
+                    //text = "Autumn And Winter Casual cotton-padded jacket & Cool Stuff, Buy now Limited offer",
+                    text = product.description,
                     style = TextStyle(
                         fontSize = 10.sp, fontFamily = MontserratFontFamily
                     ),
@@ -274,7 +278,7 @@ class AppComponents {
 
                 Spacer(modifier = Modifier.size(5.dp))
                 Text(
-                    text = "$${" 100"}",
+                    text = "$ ${product.price}",
                     style = TextStyle(
                         fontSize = 12.sp,
                         fontFamily = MontserratFontFamily,
@@ -286,12 +290,13 @@ class AppComponents {
                 Box(
                     // horizontalArrangement = Arrangement.Start
                 ) {
-                    StarRatingBar(maxStars = 5, rating = rating, onRatingChanged = {
+                    StarRatingBar(maxStars = product.rating.rate.roundToInt(),
+                        rating = rating, onRatingChanged = {
                         rating = it
                     })
 
                     Text(
-                        text = "35,980",
+                        text = product.rating.count.toString(),
                         style = TextStyle(
                             fontSize = 10.sp,
                             fontFamily = MontserratFontFamily,
@@ -307,13 +312,13 @@ class AppComponents {
     }
 
     @Composable
-    fun ProductGridLayout(notesList: List<String>, navController: NavController) {
+    fun ProductGridLayout(productList: List<ProductModelRes>, navController: NavController) {
         Spacer(modifier = Modifier.size(8.dp))
         LazyVerticalGrid(
             GridCells.Fixed(2),
-            modifier = Modifier.height(500.dp)
+            //modifier = Modifier.height(300.dp)
         ) {
-            items(notesList) { product ->
+            items(productList) { product ->
                 val isVisible = remember { mutableStateOf(false) }
                 LaunchedEffect(true) {
                     isVisible.value = true

@@ -46,6 +46,8 @@ import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.PasswordVisualTransformation
+import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -86,13 +88,15 @@ class AppComponents {
 
     @Composable
     fun InputEditText(
-        value: String,
+        hintText: String = "Enter Value",
+        value: String = "",
         onTextChanged: (String) -> Unit,
         drawableRes: Int = 0,
         isPassword: Boolean = false
     ) {
 
         TextField(value = value,
+            visualTransformation = if (isPassword) PasswordVisualTransformation() else VisualTransformation.None  ,
             onValueChange = onTextChanged,
             modifier = Modifier
                 .padding(horizontal = 16.dp)
@@ -126,7 +130,7 @@ class AppComponents {
             ),
             placeholder = {
                 Text(
-                    text = "Search for products", style = TextStyle(
+                    text = hintText, style = TextStyle(
                         fontSize = 12.sp, fontFamily = MontserratFontFamily
                     )
                     //MaterialTheme.typography.bodySmall

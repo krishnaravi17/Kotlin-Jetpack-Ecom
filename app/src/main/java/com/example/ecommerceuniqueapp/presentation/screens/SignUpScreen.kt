@@ -48,7 +48,10 @@ fun SignUpScreen(navController: NavController,) {
 
                 Spacer(modifier = Modifier.height(30.dp))
                 AppComponents().InputEditText(
-                    value = "Username or email", onTextChanged = {}, R.drawable.user_icon
+                    hintText = "Username or email",
+                    value = "",
+                    onTextChanged = {},
+                    R.drawable.user_icon
                 )
 
                 Spacer(modifier = Modifier.height(30.dp))

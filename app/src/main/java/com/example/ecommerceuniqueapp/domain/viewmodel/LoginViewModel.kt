@@ -35,12 +35,12 @@ class LoginViewModel @Inject constructor(private val repository: LoginRepo) : Vi
                 } else {
                     Log.i("response failure", response.message())
                     Log.i("response failure", response.errorBody()?.source().toString())
-                    _loginResult.value = NetworkResponse.Failure("Failed to Load Data!")
+                    _loginResult.value = NetworkResponse.Failure(response.errorBody()?.source().toString())
                 }
 
             } catch (e: Exception) {
                 Log.i("response catch", e.toString())
-                _loginResult.value = NetworkResponse.Failure("Failed to Load Data! $e")
+                _loginResult.value = NetworkResponse.Failure("Failed to Load Data! ${e.toString()}")
             }
         }
 

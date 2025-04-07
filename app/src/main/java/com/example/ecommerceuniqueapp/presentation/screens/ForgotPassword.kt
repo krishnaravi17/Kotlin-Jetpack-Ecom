@@ -48,7 +48,10 @@ fun ForgotPasswordScreen(navController: NavController,) {
 
                 Spacer(modifier = Modifier.height(30.dp))
                 AppComponents().InputEditText(
-                    value = "Enter you email address", onTextChanged = {}, R.drawable.mail_icon
+                    hintText = "Enter you email address",
+                    value = "",
+                    onTextChanged = {},
+                    R.drawable.mail_icon
                 )
 
                 Spacer(modifier = Modifier.height(10.dp))

@@ -7,6 +7,7 @@ import retrofit2.http.Body
 import retrofit2.http.GET
 import retrofit2.http.Headers
 import retrofit2.http.POST
+import retrofit2.http.Path
 import retrofit2.http.Query
 
 
@@ -25,6 +26,10 @@ interface ApiService {
     @Headers("Content-Type: application/json")
     @GET("/products")
     suspend fun productList() : Response<List<ProductModelRes>>
+
+    @Headers("Content-Type: application/json")
+    @GET("/products/{id}")
+    suspend fun getProductById(@Path("id") id: String): Response<ProductModelRes>
 
 
 }

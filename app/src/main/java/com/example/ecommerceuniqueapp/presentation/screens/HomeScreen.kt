@@ -72,6 +72,11 @@ fun HomeScreen(navController: NavController, viewModel: ProductViewModel = hiltV
         NavItem("Setting", Icons.Default.Settings, 1)
     )
 
+    //API call
+    LaunchedEffect(Unit) {
+        viewModel.productList()
+    }
+
     val productResults = viewModel.productResult.observeAsState()
 
     when (val result = productResults.value) {

@@ -8,6 +8,7 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -23,6 +24,7 @@ import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.Colors
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
@@ -241,8 +243,8 @@ class AppComponents {
                     model = product.image,
                     contentDescription = null,
                       modifier = Modifier
-                        .fillMaxWidth()
-                        .height(136.dp)
+                          .fillMaxWidth()
+                          .height(136.dp)
                 )
                 /*Image(
                     painter = painterResource(id = R.drawable.app_logo),
@@ -287,13 +289,14 @@ class AppComponents {
                     modifier = Modifier.padding(horizontal = 8.dp),
                 )
                 Spacer(modifier = Modifier.size(3.dp))
-                Box(
-                    // horizontalArrangement = Arrangement.Start
+                Row(
+                    verticalAlignment = Alignment.Bottom
+                   // horizontalArrangement = Arrangement.Start
                 ) {
                     StarRatingBar(maxStars = product.rating.rate.roundToInt(),
                         rating = rating, onRatingChanged = {
-                        rating = it
-                    })
+                            rating = it
+                        })
 
                     Text(
                         text = product.rating.count.toString(),
@@ -303,8 +306,8 @@ class AppComponents {
                             color = Color.LightGray
                         ),
                         modifier = Modifier
-                            .padding(horizontal = 8.dp)
-                            .align(alignment = Alignment.CenterEnd),
+                            .padding(bottom = 3.dp)
+                            //.align(alignment = Alignment.CenterEnd),
                     )
                 }
             }
@@ -327,7 +330,8 @@ class AppComponents {
                     visible = isVisible.value, enter = fadeIn() + expandVertically()
                 ) {
                     AppComponents().ProductItem(product = product) {
-                        navController.navigate(Routes.ProductDetailScreen.route)
+                        //navController.navigate(Routes.ProductDetailScreen.route)
+                        navController.navigate(Routes.ProductDetailScreen.createRoute(productId = product.id.toString()))
                     }
                 }
             }

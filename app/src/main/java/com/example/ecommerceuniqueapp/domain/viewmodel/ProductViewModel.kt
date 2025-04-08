@@ -21,10 +21,10 @@ class ProductViewModel @Inject constructor(private val repository: ProductRepo) 
     val productResult: LiveData<NetworkResponse<List<ProductModelRes>>> = _productResult
 
     init {
-        productList()
+        //productList()
     }
 
-    private fun productList() {
+    fun productList() {
         _productResult.value = NetworkResponse.Loading
 
         viewModelScope.launch {
@@ -47,6 +47,39 @@ class ProductViewModel @Inject constructor(private val repository: ProductRepo) 
             } catch (e: Exception) {
                 Log.i("response catch", e.toString())
                 _productResult.value = NetworkResponse.Failure("Failed to Load Data! ${e.toString()}")
+            }
+        }
+
+    }
+
+    // >>>> >>>>> >>>>> >>>>> >>>> >>>> >>> >>>>> >>>>> >>>>> >>>>> >>>>> >>>> >>>>> >>>>
+
+    private val _productByIdResult = MutableLiveData<NetworkResponse<ProductModelRes>>()
+    val productByIdResult: LiveData<NetworkResponse<ProductModelRes>> = _productByIdResult
+
+    fun getProductById(productId: String) {
+        _productByIdResult.value = NetworkResponse.Loading
+
+        viewModelScope.launch {
+            try {
+                val response = repository.getProductById(productId)
+                Log.i("response ------", response.isSuccessful.toString())
+                Log.i("response ------", response.message())
+                Log.i("response ------", response.body().toString())
+                if (response.isSuccessful) {
+                    Log.i("response success", response.body().toString())
+                    response.body()?.let {
+                        _productByIdResult.value = NetworkResponse.Success(it)
+                    }
+                } else {
+                    Log.i("response failure", response.message())
+                    Log.i("response failure", response.errorBody()?.source().toString())
+                    _productByIdResult.value = NetworkResponse.Failure(response.errorBody()?.source().toString())
+                }
+
+            } catch (e: Exception) {
+                Log.i("response catch", e.toString())
+                _productByIdResult.value = NetworkResponse.Failure("Failed to Load Data! ${e.toString()}")
             }
         }
 

@@ -1,5 +1,7 @@
 package com.example.ecommerceuniqueapp.presentation.screens
 
+import android.util.Log
+import android.widget.Toast
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -18,11 +20,18 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.Badge
+import androidx.compose.material3.BadgedBox
+import androidx.compose.material3.Icon
+import androidx.compose.material3.NavigationBar
+import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -31,6 +40,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
@@ -39,10 +49,14 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.example.ecommerceuniqueapp.R
+import com.example.ecommerceuniqueapp.data.api.NetworkResponse
 import com.example.ecommerceuniqueapp.domain.navigation.Routes
+import com.example.ecommerceuniqueapp.domain.viewmodel.ProductViewModel
 import com.example.ecommerceuniqueapp.presentation.components.AppComponents
+import com.example.ecommerceuniqueapp.presentation.components.CustomLoader
 import com.example.ecommerceuniqueapp.presentation.components.SliderBanner
 import com.example.ecommerceuniqueapp.presentation.components.StarRatingBar
 import com.example.ecommerceuniqueapp.presentation.theme.LightGray1
@@ -54,7 +68,9 @@ import com.google.accompanist.pager.ExperimentalPagerApi
 
 @OptIn(ExperimentalPagerApi::class)
 @Composable
-fun ProductDetailScreen(navController: NavController) {
+fun ProductDetailScreen(navController: NavController,
+                        viewModel: ProductViewModel = hiltViewModel(),
+                        productId: String) {
     //var products = remember { mutableStateOf<List<Product>>(emptyList()) }
     //sample list
     /*val notesList = listOf(
@@ -68,125 +84,154 @@ fun ProductDetailScreen(navController: NavController) {
         "Go for a Walk1",
     )*/
 
-    Scaffold {
-        Surface(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(it)
-                .background(
-                    color = LightGray2
-                )
-        ) {
-            Column(
-                modifier = Modifier
-                    .padding(vertical = 20.dp, horizontal = 12.dp)
-                    .fillMaxSize()
-                    .verticalScroll(rememberScrollState())
-            ) {
-                AppComponents().HeaderLayout(navController, "")
+    //API call
+    LaunchedEffect(Unit) {
+        viewModel.getProductById(productId)
+    }
 
-                SliderBanner()
+    val productByIdResult = viewModel.productByIdResult.observeAsState()
 
-                Spacer(modifier = Modifier.height(8.dp))
-                Text(
-                    text = "Size : 7UK",
-                    textAlign = TextAlign.Left,
-                    modifier = Modifier.padding(horizontal = 8.dp),
-                    style = TextStyle(
-                        fontSize = 14.sp,
-                        fontFamily = MontserratFontFamily,
-                        fontWeight = FontWeight.SemiBold
-                    )
-                )
+    when (val product = productByIdResult.value) {
+        NetworkResponse.Loading ->{
+            CustomLoader()
+            Log.i("NAVIGATION LOADING" ,">>>>>>")
+        }
+        is NetworkResponse.Success -> {
+            LaunchedEffect(Unit) {
+                Log.i("NAVIGATION SUCCESS", ">>>>>>")
+                Log.i("NAVIGATION SUCCESS" ,product.data.toString())
+                //navController.navigate(Routes.HomeScreen.route)
+            }
+            Scaffold {
+                Surface(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(it)
+                        .background(
+                            color = LightGray2
+                        )
+                ) {
+                    Column(
+                        modifier = Modifier
+                            .padding(vertical = 20.dp, horizontal = 12.dp)
+                            .fillMaxSize()
+                            .verticalScroll(rememberScrollState())
+                    ) {
+                        AppComponents().HeaderLayout(navController, "")
 
-                Spacer(modifier = Modifier.size(8.dp))
-                Row {
-                    repeat(4) {
-                        SizeItem(size = "${it + 1}UK", isSelected = it == 0) {}
+                        SliderBanner()
+
+                        Spacer(modifier = Modifier.height(8.dp))
+                        Text(
+                            text = "Size : 7UK",
+                            textAlign = TextAlign.Left,
+                            modifier = Modifier.padding(horizontal = 8.dp),
+                            style = TextStyle(
+                                fontSize = 14.sp,
+                                fontFamily = MontserratFontFamily,
+                                fontWeight = FontWeight.SemiBold
+                            )
+                        )
+
+                        Spacer(modifier = Modifier.size(8.dp))
+                        Row {
+                            repeat(4) {
+                                SizeItem(size = "${it + 1}UK", isSelected = it == 0) {}
+                            }
+                        }
+
+                        Spacer(modifier = Modifier.height(12.dp))
+                        Text(
+                            text = product.data.title,//"Nike Sneakers",
+                            textAlign = TextAlign.Left,
+                            modifier = Modifier.padding(horizontal = 8.dp),
+                            style = TextStyle(
+                                fontSize = 20.sp,
+                                fontFamily = MontserratFontFamily,
+                                fontWeight = FontWeight.SemiBold
+                            )
+                        )
+
+                        Spacer(modifier = Modifier.height(8.dp))
+                        Text(
+                            text = "Vision Alta Men’s Shoes Size (All Colours)",
+                            textAlign = TextAlign.Left,
+                            modifier = Modifier.padding(horizontal = 8.dp),
+                            style = TextStyle(
+                                fontSize = 14.sp, fontFamily = MontserratFontFamily
+                            )
+                        )
+
+                        Spacer(modifier = Modifier.size(8.dp))
+                        RatingBar()
+
+                        Spacer(modifier = Modifier.size(8.dp))
+                        AmountLayout()
+
+                        Spacer(modifier = Modifier.height(12.dp))
+                        Text(
+                            text = "Product Details",
+                            textAlign = TextAlign.Left,
+                            modifier = Modifier.padding(horizontal = 8.dp),
+                            style = TextStyle(
+                                fontSize = 14.sp,
+                                fontFamily = MontserratFontFamily,
+                                fontWeight = FontWeight.Medium
+                            )
+                        )
+                        Spacer(modifier = Modifier.height(5.dp))
+                        Text(
+                            text = product.data.description,//stringResource(R.string.description_dummy),
+                            textAlign = TextAlign.Left,
+                            modifier = Modifier.padding(horizontal = 8.dp),
+                            style = TextStyle(
+                                fontSize = 12.sp, fontFamily = MontserratFontFamily
+                            )
+                        )
+
+                        Spacer(modifier = Modifier.height(8.dp))
+                        Row {
+                            SizeItemWithRes("Nearest Store", R.drawable.location, {})
+                            SizeItemWithRes("VIP", R.drawable.password_lock_icon, {})
+                            SizeItemWithRes("Return Policy", R.drawable.return_icon, {})
+                        }
+
+                        Spacer(modifier = Modifier.height(10.dp))
+                        ButtonsLayout(navController)
+
+                        Spacer(modifier = Modifier.height(8.dp))
+                        DeliveryBannerLayout()
+
+                        Spacer(modifier = Modifier.height(8.dp))
+                        SimilarCompareLayout()
+
+                        Spacer(modifier = Modifier.height(8.dp))
+                        Text(
+                            text = "Similar To", style = TextStyle(
+                                fontSize = 20.sp,
+                                fontFamily = MontserratFontFamily,
+                                fontWeight = FontWeight.SemiBold
+                            ), modifier = Modifier.padding(horizontal = 8.dp)
+                        )
+                        Spacer(modifier = Modifier.height(5.dp))
+                        FilterLayout()
+
+
+                        //AppComponents().ProductGridLayout(notesList, navController)
                     }
                 }
-
-                Spacer(modifier = Modifier.height(12.dp))
-                Text(
-                    text = "Nike Sneakers",
-                    textAlign = TextAlign.Left,
-                    modifier = Modifier.padding(horizontal = 8.dp),
-                    style = TextStyle(
-                        fontSize = 20.sp,
-                        fontFamily = MontserratFontFamily,
-                        fontWeight = FontWeight.SemiBold
-                    )
-                )
-
-                Spacer(modifier = Modifier.height(8.dp))
-                Text(
-                    text = "Vision Alta Men’s Shoes Size (All Colours)",
-                    textAlign = TextAlign.Left,
-                    modifier = Modifier.padding(horizontal = 8.dp),
-                    style = TextStyle(
-                        fontSize = 14.sp, fontFamily = MontserratFontFamily
-                    )
-                )
-
-                Spacer(modifier = Modifier.size(8.dp))
-                RatingBar()
-
-                Spacer(modifier = Modifier.size(8.dp))
-                AmountLayout()
-
-                Spacer(modifier = Modifier.height(12.dp))
-                Text(
-                    text = "Product Details",
-                    textAlign = TextAlign.Left,
-                    modifier = Modifier.padding(horizontal = 8.dp),
-                    style = TextStyle(
-                        fontSize = 14.sp,
-                        fontFamily = MontserratFontFamily,
-                        fontWeight = FontWeight.Medium
-                    )
-                )
-                Spacer(modifier = Modifier.height(5.dp))
-                Text(
-                    text = stringResource(R.string.description_dummy),
-                    textAlign = TextAlign.Left,
-                    modifier = Modifier.padding(horizontal = 8.dp),
-                    style = TextStyle(
-                        fontSize = 12.sp, fontFamily = MontserratFontFamily
-                    )
-                )
-
-                Spacer(modifier = Modifier.height(8.dp))
-                Row {
-                    SizeItemWithRes("Nearest Store", R.drawable.location, {})
-                    SizeItemWithRes("VIP", R.drawable.password_lock_icon, {})
-                    SizeItemWithRes("Return Policy", R.drawable.return_icon, {})
-                }
-
-                Spacer(modifier = Modifier.height(10.dp))
-                ButtonsLayout(navController)
-
-                Spacer(modifier = Modifier.height(8.dp))
-                DeliveryBannerLayout()
-
-                Spacer(modifier = Modifier.height(8.dp))
-                SimilarCompareLayout()
-
-                Spacer(modifier = Modifier.height(8.dp))
-                Text(
-                    text = "Similar To", style = TextStyle(
-                        fontSize = 20.sp,
-                        fontFamily = MontserratFontFamily,
-                        fontWeight = FontWeight.SemiBold
-                    ), modifier = Modifier.padding(horizontal = 8.dp)
-                )
-                Spacer(modifier = Modifier.height(5.dp))
-                FilterLayout()
-
-
-                //AppComponents().ProductGridLayout(notesList, navController)
             }
+
         }
+        is NetworkResponse.Failure -> {
+            Log.i("NAVIGATION ERROR" ,">>>>>>")
+            Toast.makeText(LocalContext.current, product.msg, Toast.LENGTH_SHORT).show()
+        }
+
+        null -> {}
     }
+
+
 }
 
 @Composable
